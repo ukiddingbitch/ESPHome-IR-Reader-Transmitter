@@ -1,0 +1,24 @@
+esphome:
+  name: ir-reader
+
+esp32:
+  board: esp32-c3-devkitm-1
+  framework:
+    type: arduino
+
+logger:
+  baud_rate: 115200
+  level: INFO
+
+remote_receiver:
+  pin:
+    number: GPIO4
+    inverted: true
+  dump:
+    - nec
+    - lg
+    - samsung
+    - jvc
+  tolerance: 30%
+  filter: 100us
+  idle: 20000us

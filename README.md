@@ -1,52 +1,56 @@
-# ESPHome IR Reader
+# ESPHome IR Reader & Transmitter
 
-A standalone infrared remote-control decoder for the ESP32-C3 SuperMini using ESPHome and Arduino. No Wi-Fi, MQTT or Home Assistant is required.
+Two independent ESPHome examples for reading and transmitting infrared remote control commands using an ESP32-C3 SuperMini. The receiver logs NEC, LG, Samsung and JVC codes over USB; the transmitter sends example NEC commands from Home Assistant over Wi-Fi.
 
-## Hardware
+## Files
 
-- ESP32-C3 SuperMini
-- Vishay TSOP38238 — 38 kHz demodulating IR receiver (reference component)
-- Three jumper wires and a USB data cable
+- `receiver.yaml` — standalone IR receiver.
+- `transmitter.yaml` — Wi-Fi IR transmitter with example buttons.
+- `docs/receiver_wiring.svg` — receiver wiring.
+- `docs/transmitter_wiring.svg` — transmitter wiring.
 
-## Wiring
+## IR receiver
 
-![Wiring block diagram](docs/wiring.svg)
+Example hardware: ESP32-C3 SuperMini and Vishay TSOP38238 (38 kHz, active-low IR receiver).
 
-| IR receiver | ESP32-C3 |
-|---|---|
-| Pin 3 — VS | 3.3V |
-| Pin 2 — GND | GND |
-| Pin 1 — OUT | GPIO4 |
+![Receiver wiring](docs/receiver_wiring.svg)
 
-**Important:** The TSOP38238 is a verified compatible reference component, not a confirmed identification of the original receiver. Check its datasheet for pin order and supply voltage. The ESP32-C3 input is not 5 V tolerant. Use an active-low, 3.3 V-compatible output.
-
-[Vishay TSOP38238 datasheet](https://www.vishay.com/docs/82491/tsop382.pdf) — supply range: 2.5–5.5 V; use 3.3 V with ESP32-C3.
-
-## Installation
-
-Install [ESPHome](https://esphome.io/guides/installing_esphome/), connect the board with a USB data cable and run:
+Connect OUT (pin 1) to GPIO4, GND (pin 2) to GND, and VS (pin 3) to 3.3 V. A 100 nF bypass capacitor close to the receiver is optional for noise suppression. No external signal resistor is required for this example. Verify the pinout for any substitute receiver.
 
 ```sh
-esphome run ir_reader.yaml
+esphome run receiver.yaml
 ```
 
-Select the serial port when prompted. If flashing fails, follow the board's bootloader procedure. To reopen logs:
+Use the serial logs at 115200 baud, point a remote at the receiver, and press a button. Record the decoded address and command. No Wi-Fi or Home Assistant is required for this configuration.
+
+## IR transmitter
+
+Example hardware: ESP32-C3 SuperMini, Vishay TSAL6200 (940 nm IR LED), 2N2222 NPN transistor, 100 ohm LED resistor and 1 kohm base resistor.
+
+![Transmitter wiring](docs/transmitter_wiring.svg)
+
+Connect 3.3 V through the 100 ohm resistor to the LED anode. Connect its cathode to the transistor collector. Connect GPIO4 through the 1 kohm resistor to the base, and connect the emitter to GND. Check the transistor pinout for the exact package. The conservative LED current limits range; do not omit the current-limiting resistor.
+
+Create a local `secrets.yaml` beside `transmitter.yaml`:
+
+```yaml
+wifi_ssid: "YOUR_WIFI_SSID"
+wifi_password: "YOUR_WIFI_PASSWORD"
+```
+
+Do not publish your secrets. Replace the illustrative NEC addresses and commands with captured codes for your own device. Flash the transmitter:
 
 ```sh
-esphome logs ir_reader.yaml --device PORT
+esphome run transmitter.yaml
 ```
 
-Replace `PORT` with the actual serial port (e.g. `COM3` or `/dev/ttyACM0`). Serial logging depends on the board's USB interface and ESPHome logger configuration; if no logs appear on a native USB board, try setting `hardware_uart: USB_SERIAL_JTAG` under `logger`.
+Add the ESPHome device to Home Assistant and use the exposed buttons. The NEC action uses a 38 kHz carrier; the configured carrier duty cycle is 50%. For other protocols, use the appropriate ESPHome transmit action. Configure API encryption and OTA authentication before using on an untrusted network.
 
-## Usage
+## Notes
 
-Point a remote control at the receiver and press a button. Inspect the logs for decoded addresses and commands. Supported decoders: NEC, LG, Samsung and JVC. Other protocols are not included in this configuration.
+The configurations are separate examples, both using GPIO4; do not connect both circuits to that same pin simultaneously. Use separate boards or flash the appropriate firmware when switching circuits. Component models are examples, not requirements. The receiver retains the supplied decoder settings, with an English device name. The transmitter codes are illustrative and are not guaranteed to control any specific device. Firmware compilation and hardware tests have not been performed on this package.
 
-| Setting | Value |
-|---|---|
-| Input | GPIO4, inverted |
-| Tolerance | 30% |
-| Filter | 100 µs |
-| Idle | 20 ms |
-| Log level | INFO |
-| Baud rate | 115200 |
+## References
+
+- [ESPHome Remote Receiver](https://esphome.io/components/remote_receiver/)
+- [ESPHome Remote Transmitter](https://esphome.io/components/remote_transmitter/)

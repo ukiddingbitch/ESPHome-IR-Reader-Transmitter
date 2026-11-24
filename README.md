@@ -50,5 +50,3 @@ Point a remote control at the receiver and press a button. Inspect the logs for 
 | Idle | 20 ms |
 | Log level | INFO |
 | Baud rate | 115200 |
-
-The original YAML is preserved as supplied. If your ESPHome version rejects underscores in device names, change `ir_citacka` to `ir-citacka`. This repository package has not been compiled or hardware-tested during packaging.

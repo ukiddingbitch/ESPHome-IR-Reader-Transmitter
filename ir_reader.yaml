@@ -1,5 +1,5 @@
 esphome:
-  name: ir_citacka
+  name: ir_reader
 
 esp32:
   board: esp32-c3-devkitm-1

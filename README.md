@@ -27,13 +27,13 @@ A standalone infrared remote-control decoder for the ESP32-C3 SuperMini using ES
 Install [ESPHome](https://esphome.io/guides/installing_esphome/), connect the board with a USB data cable and run:
 
 ```sh
-esphome run ir_citacka.yaml
+esphome run ir_reader.yaml
 ```
 
 Select the serial port when prompted. If flashing fails, follow the board's bootloader procedure. To reopen logs:
 
 ```sh
-esphome logs ir_citacka.yaml --device PORT
+esphome logs ir_reader.yaml --device PORT
 ```
 
 Replace `PORT` with the actual serial port (e.g. `COM3` or `/dev/ttyACM0`). Serial logging depends on the board's USB interface and ESPHome logger configuration; if no logs appear on a native USB board, try setting `hardware_uart: USB_SERIAL_JTAG` under `logger`.
